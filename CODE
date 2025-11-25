@@ -1,0 +1,194 @@
+package com.jspider.programs;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Scanner;
+public class program11 {
+	public  static class MainProgram{
+		static private final String dburl = "jdbc:mysql://localhost:3306/arul";
+		static private final String user = "root";
+		static private final String password = "Arul@6380268279";
+		public static void main(String[] args) throws SQLException {
+			Connection con=null;
+			try {
+				Class.forName("com.mysql.cj.jdbc.Driver");//Loading driver
+			}
+			catch(ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+			try {
+			    con = DriverManager.getConnection(dburl,user,password);//Establish Connection
+			}
+			catch(SQLException e) {
+				e.printStackTrace();
+			}
+			Scanner sc = new Scanner(System.in);
+			while(true) {
+				System.out.println("1.Insert 2.Update 3.Delete 4.ReadAll 5.ReadById 6.Exit");
+				System.out.println("enter the choice : ");
+				int choice=sc.nextInt();
+				if(choice==6) {
+					System.out.println("thank you!!!");
+					break;
+				}
+				switch(choice) {
+				case 1:program11.insert(con, sc);
+				       break;
+				case 2:program11.update(con, sc);
+			           break;
+				case 3:program11.delete(con, sc);
+			           break;  
+				case 4:program11.read(con, sc);
+			           break;
+				case 5:program11.readByItemNo(con, sc);
+		               break;
+				default:System.out.println("Invalid Choice");
+				       break;
+				}
+			}
+		}
+	}
+		public static void insert(Connection con,Scanner scn) {
+			System.out.print("Enter Item_No : ");
+			int item_no = scn.nextInt();
+			scn.nextLine();
+			System.out.print("Enter Item_Name : ");
+			String item_name = scn.nextLine();
+			System.out.print("Enter Item_Quantity : ");
+			int item_quantity = scn.nextInt();
+			System.out.print("Enter Item_Price : ");
+			int item_price = scn.nextInt();
+			scn.nextLine();
+			System.out.print("Enter Item_Expiry_Date : ");
+			String item_ed = scn.nextLine();
+			String query="INSERT INTO STORE (ITEM_NO, ITEM_NAME, ITEM_QUANTITY, ITEM_PRICE, ITEM_ED) VALUES (?, ?, ?, ?, ?)";
+			try {
+			PreparedStatement psmt=con.prepareStatement(query);
+			psmt.setInt(1,item_no);
+			psmt.setString(2,item_name);
+			psmt.setInt(3,item_quantity);
+			psmt.setInt(4,item_price);
+			psmt.setString(5,item_ed);
+			int status =psmt.executeUpdate();
+			if(status>0) {
+				System.out.println("inserted");
+			}else {
+				System.out.println("try again");
+			}
+			
+		}
+			catch(Exception e){
+				e.printStackTrace();
+			}
+	}
+        public static void update(Connection con,Scanner scn) {
+        	System.out.println("enter item_price to update");
+        	int item_price=scn.nextInt();
+        	scn.nextLine();
+        	System.out.println("enter item_ed to update");
+        	String item_ed=scn.nextLine();
+        	System.out.println("enter item_no to update");
+        	int item_no=scn.nextInt();
+            String query="UPDATE STORE SET ITEM_PRICE='"+item_price+"',ITEM_ED='"+item_ed+"'"+"WHERE ITEM_NO="+item_no+" ";
+            try {
+			Statement stmt=con.createStatement();
+			int status =stmt.executeUpdate(query);
+			if(status>0) {
+				System.out.println("Updated");
+			}else {
+				System.out.println("try again");
+			}
+			
+            }
+			catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+        public static void delete(Connection con,Scanner scn) {
+        	System.out.println("enter item_no to delete");
+        	int item_no=scn.nextInt();
+        	String query="DELETE FROM STORE WHERE ITEM_NO="+item_no;
+        	try {
+        		Statement stmt=con.createStatement();
+        		int status=stmt.executeUpdate(query);
+        		if(status>0) {
+        			System.out.println("deleted");
+        		}
+        		else {
+        			System.out.println("try again");
+        		}
+        		
+        	}
+        		catch(Exception e) {
+        			e.printStackTrace();
+        		}
+        }
+        public static void read(Connection con,Scanner scn) {
+        	String query="SELECT * FROM STORE";
+        	try {
+        		Statement stmt=con.createStatement();
+        		ResultSet rs=stmt.executeQuery(query);
+        		System.out.println("item_no\titem_name\titem_quantity\titem_price\titem_ed");
+        		System.out.println("------------------------------------------------------");
+        		while(rs.next()) {
+        			int item_no=rs.getInt(1);
+        			String item_name=rs.getString(2);
+        			String item_quantity=rs.getString(3);
+        			String item_price=rs.getString(4);
+        			String item_ed=rs.getString(5);
+    				System.out.println(item_no+"\t "+item_name+"\t\t"+item_quantity+"\t "+item_price+"\t\t"+item_ed);
+    			}
+    			System.out.println("+----------+------------+--------------+-----------+-----------+");
+    			
+    		} catch(Exception e) {
+    			e.printStackTrace();
+    		}
+    	}   
+        public static void readByItemNo(Connection con,Scanner scn) throws SQLException {
+        	System.out.println("enter the item no");
+        	int item_no=scn.nextInt();
+        	try {
+        		String query="SELECT * FROM STORE WHERE ITEM_NO="+item_no;
+            	Statement stmt=con.createStatement();
+            	ResultSet rs=stmt.executeQuery(query);
+            	System.out.println("Item_No\t Item_Name \t Item_Quantity\t Item_Price\tItem_ED");
+    			System.out.println("-------------------------------------------------------------------");
+            	if(rs.next()) {
+            		int item_no1=rs.getInt(1);
+            		String item_name=rs.getString(2);
+        			String item_quantity=rs.getString(3);
+        			String item_price=rs.getString(4);
+        			String item_ed=rs.getString(5);
+        			System.out.println(item_no1+"\t"+item_name+"\t"+item_quantity+"\t"+item_price+"\t"+item_ed);
+            	}
+            	else {
+            		System.out.println("ivalid item number"+item_no);
+            	}
+            	
+        	}catch(Exception e) {
+        		e.printStackTrace();
+        	}
+        }
+}
+        
+     
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
